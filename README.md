@@ -81,3 +81,4 @@ di bagian hasil). File `PROJECT_PLAN.md` di folder ini menjelaskan
 pemetaan tech stack proyek versi Python ini terhadap bagian metodologi
 di naskah tersebut.
 # plantvillage-disease-detection
+# plantvillage-disease-detection
