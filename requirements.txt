@@ -1,0 +1,21 @@
+# Inti deep learning (versi CPU saja — tidak perlu CUDA/GPU)
+tensorflow-cpu>=2.16.1,<2.18
+tensorflow-datasets>=4.9.4
+
+# Data & evaluasi
+numpy
+pandas
+scikit-learn
+matplotlib
+
+# Image processing (dipakai oleh app.py)
+Pillow
+
+# Interface
+gradio
+
+# Opsional: hanya jika ingin ekspor ke TensorFlow.js
+# tensorflowjs
+
+# Opsional (alternatif lebih ringan untuk app.py jika tidak butuh training):
+# tflite-runtime
