@@ -19,3 +19,6 @@ gradio
 
 # Opsional (alternatif lebih ringan untuk app.py jika tidak butuh training):
 # tflite-runtime
+
+# AI Background Removal (Untuk pipeline In-The-Wild)
+rembg>=2.0.50

@@ -21,6 +21,7 @@ from PIL import Image
 
 import config
 import gradio as gr
+from src.detector import remove_background
 
 MODEL_PATH = config.TFLITE_DIR / "model.tflite"
 LABEL_PATH = config.TFLITE_DIR / "label.txt"
@@ -81,13 +82,21 @@ SUPPORTED_PLANTS = sorted(list(set([
 ])))
 
 
-def predict(image: Image.Image):
+def predict(image: Image.Image, enable_autocrop: bool):
     if image is None:
-        return {}, "Silakan unggah citra daun terlebih dahulu."
+        return {}, "Silakan unggah citra daun terlebih dahulu.", "Tidak ada gambar", None
 
     start = time.perf_counter()
-
-    img = image.convert("RGB").resize(IMG_SIZE)
+    
+    # Simpan original untuk comparison
+    processed_image = image
+    
+    # TAHAP 1: Localization / Auto-Crop (Jika diaktifkan)
+    if enable_autocrop:
+        processed_image = remove_background(image)
+        
+    # TAHAP 2: Classification (CNN)
+    img = processed_image.convert("RGB").resize(IMG_SIZE)
     arr = np.array(img, dtype=np.float32) / 255.0
     arr = np.expand_dims(arr, axis=0)
 
@@ -110,9 +119,9 @@ def predict(image: Image.Image):
     else:
         diagnosis = f"### ❌ Diagnosis Utama: Tanaman Terjangkit Penyakit\nBerpeluang **{best_conf:.1f}%** bahwa daun ini terdeteksi sebagai **{CLASS_NAMES_FORMATTED[best_idx]}**."
         
-    info_text = f"Waktu inferensi: {elapsed_ms:.1f} ms (CPU)"
+    info_text = f"Waktu inferensi total: {elapsed_ms:.1f} ms (CPU)"
 
-    return result, diagnosis, info_text
+    return result, diagnosis, info_text, processed_image
 
 
 def build_demo():
@@ -134,14 +143,20 @@ def build_demo():
         with gr.Row():
             with gr.Column():
                 image_input = gr.Image(type="pil", label="Unggah Foto Daun")
+                enable_autocrop = gr.Checkbox(label="🪄 Aktifkan AI Background Removal (Untuk foto di alam liar / In-The-Wild)", value=False)
                 predict_btn = gr.Button("🔍 Analisis Daun", variant="primary")
             with gr.Column():
                 diagnosis_output = gr.Markdown("### ⏳ Menunggu gambar...")
                 label_output = gr.Label(num_top_classes=5, label="Persentase Keyakinan (Top-5)")
                 info_output = gr.Textbox(label="Performa Sistem", interactive=False)
+        
+        with gr.Row():
+            # Untuk mendemonstrasikan hasil Auto-Crop ke user
+            processed_image_output = gr.Image(type="pil", label="Citra Daun Setelah Diproses (Tahap 1)", interactive=False)
 
-        predict_btn.click(fn=predict, inputs=image_input, outputs=[label_output, diagnosis_output, info_output])
-        image_input.change(fn=predict, inputs=image_input, outputs=[label_output, diagnosis_output, info_output])
+        predict_btn.click(fn=predict, inputs=[image_input, enable_autocrop], outputs=[label_output, diagnosis_output, info_output, processed_image_output])
+        image_input.change(fn=predict, inputs=[image_input, enable_autocrop], outputs=[label_output, diagnosis_output, info_output, processed_image_output])
+        enable_autocrop.change(fn=predict, inputs=[image_input, enable_autocrop], outputs=[label_output, diagnosis_output, info_output, processed_image_output])
 
         gr.Markdown(
             "---\n"
