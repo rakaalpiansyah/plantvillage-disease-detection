@@ -25,9 +25,10 @@ def remove_background(image: Image.Image) -> Image.Image:
     # Proses remove background
     output_image = remove(image)
     
-    # Karena output RGBA (transparan), kita ubah ke RGB dengan background hitam.
-    # Model PlantVillage CNN lebih mudah memproses background solid daripada transparan.
-    background = Image.new("RGB", output_image.size, (0, 0, 0))
+    # Karena output RGBA (transparan), kita ubah ke RGB dengan background abu-abu terang.
+    # Model PlantVillage dilatih dengan background kertas abu-abu/putih.
+    # Background hitam solid (0,0,0) akan merusak prediksi CNN.
+    background = Image.new("RGB", output_image.size, (180, 180, 180))
     if output_image.mode == 'RGBA':
         background.paste(output_image, mask=output_image.split()[3]) 
     else:

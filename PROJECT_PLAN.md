@@ -70,5 +70,5 @@ subset data dulu untuk eksperimen cepat sebelum run penuh).
 - [x] Jalankan `python -m src.evaluate`, simpan `confusion_matrix.png` dan `classification_report.csv` — masukkan ke naskah jurnal sebagai Gambar/Tabel hasil.
 - [x] Jalankan `python -m src.export`, lalu `python app.py` — ambil screenshot interface untuk bagian "Implementasi Sistem".
 - [x] Tambahkan benchmark waktu inferensi (`app.py` sudah otomatis menampilkan ini per prediksi) sebagai data kuantitatif tambahan.
-- [x] (Opsional, nilai tambah jurnal) Tambahkan baseline pembanding (mis. MobileNetV2 transfer learning) untuk memperkuat klaim "CNN custom lebih ringan dengan akurasi kompetitif".
-- [x] Update naskah jurnal (`Draft_Naskah_Jurnal_Klasifikasi_PlantVillage.md`) bagian metodologi: cukup tambahkan satu paragraf bahwa implementasi dilakukan sebagai proyek Python modular (sebutkan struktur `src/`) untuk reproducibility — referensikan repo/folder ini.
+- [x] Lakukan Studi Ablasi (menggunakan `rembg`) untuk menganalisis domain shift dan membuktikan adanya **Clever Hans Effect** pada model yang dilatih dengan dataset PlantVillage.
+- [x] Update naskah jurnal menjadi versi komprehensif (`Paper_CoreID_Klasifikasi_Penyakit_Tanaman_CNN.md`), lalu buat script Python (`generate_paper.py`) untuk otomatis mengekspor ke format `.docx` (template CoreID, IEEE style, 25 referensi).

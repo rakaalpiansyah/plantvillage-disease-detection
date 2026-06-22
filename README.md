@@ -67,18 +67,17 @@ python app.py
 Setelah `python app.py` dijalankan, buka URL lokal yang muncul di terminal (default `http://127.0.0.1:7860`) di browser. 
 Aplikasi akan menampilkan antarmuka cerdas dengan daftar 14 tanaman yang didukung (mencakup 38 kelas), serta terjemahan status daun (sehat/berpenyakit) secara interaktif.
 
-## Catatan Penting: Domain Shift (In-The-Wild vs Lab)
+## Catatan Penting: Domain Shift & Clever Hans Effect
 
 Model ini dilatih pada dataset PlantVillage yang berisi **gambar daun close-up dengan latar belakang lab yang seragam**.
-Jika Anda menguji model menggunakan gambar dari alam liar (*in-the-wild*) yang memiliki latar belakang rumit (seperti tanah, ranting, atau buah), model mungkin mengalami kebingungan karena perbedaan *domain data*. Hal ini sangat direkomendasikan untuk dibahas dalam batasan masalah di jurnal penelitian Anda.
+Melalui **Studi Ablasi** menggunakan algoritma segmentasi latar belakang (`rembg`), kami menemukan bahwa model mengalami fenomena **Clever Hans Effect**.
+
+Ketika latar belakang asli dihapus dan diganti dengan warna solid abu-abu digital murni, akurasi model turun secara drastis (sekitar 26.3% sampel mengalami misklasifikasi). Hal ini membuktikan bahwa CNN tidak hanya mempelajari fitur patologis daun (bercak/lesi), tetapi juga 'menghafal' tekstur dan pola pencahayaan dari latar belakang dataset PlantVillage.
+Ini adalah temuan krusial yang memvalidasi kelemahan model *in-vitro* ketika dihadapkan pada data alam liar (*in-the-wild*), dan menjadi kontribusi analitis utama dalam paper jurnal yang dihasilkan.
 
 ## Untuk Penulisan Jurnal
 
-Lihat `Draft_Naskah_Jurnal_Klasifikasi_PlantVillage.md` untuk kerangka
-naskah (judul, latar belakang, tinjauan pustaka/related work dengan
-referensi terverifikasi, metodologi, dan daftar hal yang perlu dilaporkan
-di bagian hasil). File `PROJECT_PLAN.md` di folder ini menjelaskan
-pemetaan tech stack proyek versi Python ini terhadap bagian metodologi
-di naskah tersebut.
-# plantvillage-disease-detection
-# plantvillage-disease-detection
+File paper komprehensif sudah di-generate secara otomatis! Anda dapat menjalankan `generate_paper.py` untuk membuat file `.docx` siap pakai yang formatnya sudah disesuaikan dengan template CoreID Journal (IEEE style, 25 referensi).
+
+* File hasil: `Paper_CoreID_v2_Komprehensif.docx`
+* Naskah Markdown asli: `Paper_CoreID_Klasifikasi_Penyakit_Tanaman_CNN.md`

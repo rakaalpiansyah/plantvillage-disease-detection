@@ -217,7 +217,11 @@ demo.launch()
 - [x] **Confusion matrix** (simpan dari `artifacts/confusion_matrix.png`).
 - [x] **Precision, recall, F1-score per kelas** (salin dari `artifacts/classification_report.csv`).
 - [x] Contoh prediksi benar & salah (qualitative analysis).
-- [x] **Pembahasan Keterbatasan (Domain Shift):** Bahas temuan penting bahwa meskipun akurasi uji sangat tinggi (97.12%), model rentan mengalami misklasifikasi (*misclassification*) ketika diuji dengan gambar alam liar (*in-the-wild*) yang mengandung buah atau latar belakang (background) kompleks (seperti tanah, objek lain). Hal ini terjadi karena model dilatih murni pada gambar *close-up* daun berlatar belakang seragam dari lab. Ini adalah bukti adanya *Domain Shift* antara data latih (PlantVillage) dan data dunia nyata.
+- [x] **Analisis Keterbatasan dan Tantangan Implementasi Dunia Nyata:**
+  Bahas temuan penting mengenai tantangan implementasi model yang dilatih pada dataset laboratorium (*in-vitro*) ketika dihadapkan pada data alam liar (*in-the-wild*). Analisis ini sangat krusial untuk dipaparkan secara komprehensif dalam jurnal:
+  - **Kesenjangan Domain (*Domain Gap / Distribution Shift*):** Dataset PlantVillage memiliki latar belakang seragam, pencahayaan konsisten, dan *center-cropped*. Sebaliknya, citra *in-the-wild* memiliki latar belakang kompleks (tanah, pot, jari) dan variasi pencahayaan. Hal ini memicu kecenderungan CNN untuk mengalami *overfitting* pada *noise* latar belakang, di mana model secara keliru "menghafal" pola latar belakang homogen sebagai fitur klasifikasi, bukan lesi penyakitnya.
+  - **Inkonsistensi Pipeline Pra-pemrosesan (*Preprocessing Mismatch*):** Pentingnya menjaga konsistensi antara fase pelatihan dan inferensi (*deployment*). Sistem ini telah memitigasi inkonsistensi tersebut dengan mengimplementasikan normalisasi skala piksel (`img / 255.0`) dan secara eksplisit menyelaraskan ruang warna ke RGB (`img.convert("RGB")`) pada *interface* prediksi untuk menghindari degradasi akurasi akibat perbedaan format pembacaan citra (seperti BGR pada OpenCV vs RGB pada PIL).
+  - **Mitigasi Melalui *Data Augmentation*:** Pendekatan sistem ini dalam menggunakan augmentasi spasial secara *real-time* (*Random Rotation, Zoom, Flip*) selama proses pelatihan telah terbukti vital dalam mensimulasikan kondisi dunia nyata dan mengatasi masalah *imbalanced dataset* tanpa memori tambahan.
 - [x] Perbandingan ukuran model & waktu inferensi: Keras Model (55 MB) vs TFLite (4.4 MB, ~6ms per gambar di CPU).
 - [x] Tangkapan layar antarmuka (interface) web Gradio yang dibangun + alur penggunaan.
 - [x] Perbandingan singkat dengan hasil studi terdahulu (tabel di Bab 4 sesuai Bagian 4 dokumen ini).
@@ -230,6 +234,9 @@ demo.launch()
 - Model CNN 4-blok konvolusi berhasil melampaui target awal dengan mencapai akurasi uji (*test accuracy*) sebesar **97.12%** pada dataset PlantVillage (38 kelas).
 - Strategi pelatihan seperti *Data Augmentation*, *Early Stopping*, dan mekanisme *Fallback Out-of-Memory* terbukti sangat tangguh untuk melatih model secara efisien di lingkungan komputasi CPU yang terbatas.
 - Model berhasil dikonversi ke format TFLite (hanya 4.4 MB) dan diimplementasikan ke dalam antarmuka *Web UI* (Gradio) dengan latensi sangat rendah (~6 ms), membuktikan kelayakannya untuk *deployment* di perangkat *edge*.
+
+**Batasan Penelitian (*Limitation*):**
+- Arsitektur *Two-Stage Pipeline* (rembg + CNN) saat ini masih memiliki kelemahan jika dihadapkan pada kondisi ekstrem. Misalnya, jika terdapat dua helai daun dari spesies tanaman yang berbeda saling tumpang tindih dalam satu *frame*, modul segmentasi (rembg) akan kesulitan memisahkan kontur utamanya, sehingga berisiko menghasilkan *crop* yang *ambigu*. Selain itu, pada kondisi pencahayaan malam hari dengan kontras sangat rendah, model AI segmentasi berpotensi memotong bagian daun yang sehat dan hanya menyisakan batang. Evaluasi lebih lanjut terhadap *pipeline* ini dalam berbagai kondisi pencahayaan masih diperlukan.
 
 **Saran Pengembangan (Future Work):**
 

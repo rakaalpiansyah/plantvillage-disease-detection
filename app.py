@@ -86,16 +86,20 @@ def predict(image: Image.Image, enable_autocrop: bool):
     if image is None:
         return {}, "Silakan unggah citra daun terlebih dahulu.", "Tidak ada gambar", None
 
-    start = time.perf_counter()
+    start_total = time.perf_counter()
     
     # Simpan original untuk comparison
     processed_image = image
+    rembg_ms = 0.0
     
     # TAHAP 1: Localization / Auto-Crop (Jika diaktifkan)
     if enable_autocrop:
+        start_rembg = time.perf_counter()
         processed_image = remove_background(image)
+        rembg_ms = (time.perf_counter() - start_rembg) * 1000
         
     # TAHAP 2: Classification (CNN)
+    start_cnn = time.perf_counter()
     img = processed_image.convert("RGB").resize(IMG_SIZE)
     arr = np.array(img, dtype=np.float32) / 255.0
     arr = np.expand_dims(arr, axis=0)
@@ -104,7 +108,8 @@ def predict(image: Image.Image, enable_autocrop: bool):
     INTERPRETER.invoke()
     preds = INTERPRETER.get_tensor(OUTPUT_DETAILS[0]["index"])[0]
 
-    elapsed_ms = (time.perf_counter() - start) * 1000
+    cnn_ms = (time.perf_counter() - start_cnn) * 1000
+    total_ms = (time.perf_counter() - start_total) * 1000
 
     top5_idx = preds.argsort()[-5:][::-1]
     result = {CLASS_NAMES_FORMATTED[i]: float(preds[i]) for i in top5_idx}
@@ -119,7 +124,11 @@ def predict(image: Image.Image, enable_autocrop: bool):
     else:
         diagnosis = f"### ❌ Diagnosis Utama: Tanaman Terjangkit Penyakit\nBerpeluang **{best_conf:.1f}%** bahwa daun ini terdeteksi sebagai **{CLASS_NAMES_FORMATTED[best_idx]}**."
         
-    info_text = f"Waktu inferensi total: {elapsed_ms:.1f} ms (CPU)"
+    info_text = f"⚙️ Profiling Inferensi:\n"
+    if enable_autocrop:
+        info_text += f"- Segmentasi (rembg): {rembg_ms:.1f} ms\n"
+    info_text += f"- Klasifikasi (CNN): {cnn_ms:.1f} ms\n"
+    info_text += f"- Total Waktu: {total_ms:.1f} ms (CPU)"
 
     return result, diagnosis, info_text, processed_image
 
